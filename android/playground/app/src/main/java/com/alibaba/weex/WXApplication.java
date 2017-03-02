@@ -206,6 +206,7 @@ package com.alibaba.weex;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 
 import com.alibaba.weex.commons.adapter.DefaultWebSocketAdapterFactory;
@@ -225,6 +226,11 @@ import com.taobao.weex.WXEnvironment;
 import com.taobao.weex.WXSDKEngine;
 import com.taobao.weex.WXSDKManager;
 import com.taobao.weex.common.WXException;
+import com.taobao.weex.utils.WXLogUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 public class WXApplication extends Application {
 
@@ -315,7 +321,7 @@ public class WXApplication extends Application {
         }
       }
     });
-
+    loadPlugin();
   }
 
   /**
@@ -336,4 +342,34 @@ public class WXApplication extends Application {
     }
   }
 
+  private void loadPlugin() {
+    try {
+      AssetManager assetManager = getAssets();
+      String[] pluginProps = assetManager.list("weex_plugin/module");
+      long mark = System.currentTimeMillis();
+      if (pluginProps != null && pluginProps.length > 0) {
+        for (String prop : pluginProps) {
+          if (prop.endsWith(".properties")) {
+            Properties properties = new Properties();
+            InputStream inputStream = assetManager.open("weex_plugin/module/" + prop);
+            properties.load(inputStream);
+            WXLogUtils.e("PLUGIN_PROPS", properties.keySet().toString());
+            inputStream.close();
+            try {
+              Class clazz = Class.forName(properties.getProperty("class"));
+              WXSDKEngine.registerModule(properties.getProperty("name"), clazz, Boolean.parseBoolean(properties.getProperty("globalRegistration")));
+              WXLogUtils.e("REGISTER_PLUGIN", properties.getProperty("name")  + " registered");
+            } catch (ClassNotFoundException e) {
+              e.printStackTrace();
+            } catch (WXException e) {
+              e.printStackTrace();
+            }
+          }
+        }
+      }
+      WXLogUtils.e("PLUGIN_PROPS", (System.currentTimeMillis() - mark) + " ms");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 }
