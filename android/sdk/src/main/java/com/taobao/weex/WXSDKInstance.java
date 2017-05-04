@@ -1225,6 +1225,24 @@ public class WXSDKInstance implements IWXActivityStateListener,DomContext, View.
     WXSDKManager.getInstance().getWXDomManager().sendMessage(message);
   }
 
+  public void updateComponentStyle(String ref, JSONObject style) {
+    if (ref == null) {
+      return;
+    }
+
+    Message message = Message.obtain();
+    WXDomTask task = new WXDomTask();
+    task.instanceId = getInstanceId();
+    if (task.args == null) {
+      task.args = new ArrayList<>();
+    }
+    task.args.add(ref);
+    task.args.add(style);
+    message.obj = task;
+    message.what = WXDomHandler.MsgType.WX_DOM_UPDATE_STYLE;
+    WXSDKManager.getInstance().getWXDomManager().sendMessage(message);
+  }
+
   public void setSize(int width, int height) {
     if (width < 0 || height < 0 || isDestroy || !mRendered) {
       return;

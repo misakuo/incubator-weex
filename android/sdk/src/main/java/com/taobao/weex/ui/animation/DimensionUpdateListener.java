@@ -27,6 +27,10 @@ import android.support.v4.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.alibaba.fastjson.JSONObject;
+import com.taobao.weex.ui.component.WXComponent;
+import com.taobao.weex.ui.view.IRenderResult;
+
 public class DimensionUpdateListener implements ValueAnimator.AnimatorUpdateListener {
 
   private View view;
@@ -67,6 +71,20 @@ public class DimensionUpdateListener implements ValueAnimator.AnimatorUpdateList
       }
       if (preHeight != layoutParams.height || preWidth != layoutParams.width) {
         view.requestLayout();
+
+        if (view instanceof IRenderResult) {
+          WXComponent component = ((IRenderResult) view).getComponent();
+          if (component != null) {
+            JSONObject newStyle = new JSONObject(2);
+            if (preWidth != layoutParams.width) {
+              newStyle.put("width", layoutParams.width);
+            }
+            if (preHeight != layoutParams.height) {
+              newStyle.put("height", layoutParams.height);
+            }
+            component.getInstance().updateComponentStyle(component.getRef(), newStyle);
+          }
+        }
       }
     }
   }
