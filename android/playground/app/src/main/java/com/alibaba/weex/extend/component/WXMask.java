@@ -60,10 +60,19 @@ public class WXMask extends WXVContainer {
     mPopupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
     mPopupWindow.setFocusable(true);
 
-    Rect outRect = new Rect();
-    ((Activity) context).getWindow().getDecorView().getWindowVisibleDisplayFrame(outRect);
+    int statusBarHeight = 0;
+    if (context instanceof Activity
+            && ((Activity) context).getWindow() != null
+            && ((Activity) context).getWindow().getDecorView() != null) {
+      Rect outRect = new Rect();
+      ((Activity) context).getWindow().getDecorView().getWindowVisibleDisplayFrame(outRect);
+      statusBarHeight = outRect.top;
+    }
 
-    mPopupWindow.showAtLocation(((Activity) context).getWindow().getDecorView(), Gravity.TOP, (int) getDomObject().getLayoutX(), (int) getDomObject().getLayoutY() + outRect.top);
+    mPopupWindow.showAtLocation(((Activity) context).getWindow().getDecorView(),
+            Gravity.TOP,
+            (int) getDomObject().getLayoutX(),
+            (int) getDomObject().getLayoutY() + statusBarHeight);
 
     return mContainerView;
   }
