@@ -21,7 +21,6 @@ package com.alibaba.weex.extend.component;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.view.Gravity;
@@ -33,6 +32,9 @@ import com.alibaba.weex.extend.view.WXMaskView;
 import com.taobao.weex.WXSDKInstance;
 import com.taobao.weex.dom.WXDomObject;
 import com.taobao.weex.ui.component.WXVContainer;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by lixinke on 2016/12/26.
@@ -53,26 +55,28 @@ public class WXMask extends WXVContainer {
     mContainerView = new WXMaskView(context);
     mPopupWindow = new PopupWindow(context);
     mPopupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-    mPopupWindow.setClippingEnabled(false);
+
+    //setClippingEnabled(false) will cause INPUT_ADJUST_PAN invalid.
+    //mPopupWindow.setClippingEnabled(false);
+
     mPopupWindow.setContentView(mContainerView);
     mPopupWindow.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
     mPopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-    mPopupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+    mPopupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN|WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
     mPopupWindow.setFocusable(true);
 
-    int statusBarHeight = 0;
-    if (context instanceof Activity
-            && ((Activity) context).getWindow() != null
-            && ((Activity) context).getWindow().getDecorView() != null) {
-      Rect outRect = new Rect();
-      ((Activity) context).getWindow().getDecorView().getWindowVisibleDisplayFrame(outRect);
-      statusBarHeight = outRect.top;
-    }
+    mPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+      @Override
+      public void onDismiss() {
+        fireVisibleChangedEvent(false);
+      }
+    });
 
     mPopupWindow.showAtLocation(((Activity) context).getWindow().getDecorView(),
             Gravity.TOP,
             (int) getDomObject().getLayoutX(),
-            (int) getDomObject().getLayoutY() + statusBarHeight);
+            (int) getDomObject().getLayoutY());
+    fireVisibleChangedEvent(true);
 
     return mContainerView;
   }
@@ -87,5 +91,11 @@ public class WXMask extends WXVContainer {
     if (mPopupWindow.isShowing()) {
       mPopupWindow.dismiss();
     }
+  }
+
+  private void fireVisibleChangedEvent(boolean visible) {
+    Map<String, Object> event = new HashMap<>(1);
+    event.put("visible", visible);
+    fireEvent("visiblechanged", event);
   }
 }
