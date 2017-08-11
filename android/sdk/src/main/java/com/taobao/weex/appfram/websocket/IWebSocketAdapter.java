@@ -27,10 +27,18 @@ import android.support.annotation.Nullable;
 public interface IWebSocketAdapter {
 
     String HEADER_SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
+    int PAYLOAD_TYPE_TEXT = 1;
+    int PAYLOAD_TYPE_BINARY = 2;
 
     void connect(String url, @Nullable String protocol, EventListener listener);
 
+    /**
+     * using {@link #send(int, Object)} instead.
+     */
+    @Deprecated
     void send(String data);
+
+    void send(int type, Object data);
 
     void close(int code, String reason);
 
@@ -39,7 +47,17 @@ public interface IWebSocketAdapter {
     interface EventListener {
         void onOpen();
 
+        /**
+         * using {@link #onMessage(int type, Object data)} instead.
+         */
+        @Deprecated
         void onMessage(String data);
+
+        /**
+         * @param type should be {@link #PAYLOAD_TYPE_TEXT} or {@link #PAYLOAD_TYPE_BINARY}
+         * @param data String or byte[]
+         */
+        void onMessage(int type, Object data);
 
         void onClose(int code, String reason, boolean wasClean);
 

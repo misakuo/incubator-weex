@@ -139,14 +139,32 @@ public class DefaultWebSocketAdapter implements IWebSocketAdapter {
 
     @Override
     public void send(String data) {
+        //Deprecated
+    }
+
+    @Override
+    public void send(int type, Object data) {
         if (ws != null) {
             try {
-                Buffer buffer = new Buffer().writeUtf8(data);
-                ws.sendMessage(WebSocket.PayloadType.TEXT, buffer.buffer());
-                buffer.flush();
-                buffer.close();
+                Buffer buffer = null;
+                if (type == PAYLOAD_TYPE_TEXT) {
+                    buffer = new Buffer().writeUtf8(data.toString());
+                    ws.sendMessage(WebSocket.PayloadType.TEXT, buffer.buffer());
+                } else if (type == PAYLOAD_TYPE_BINARY) {
+                    buffer = new Buffer().write((byte[]) data);
+                    ws.sendMessage(WebSocket.PayloadType.BINARY, buffer.buffer());
+                }
 
-                wsEventReporter.frameSent(data);
+                if (buffer != null) {
+                    buffer.flush();
+                    buffer.close();
+                }
+
+                if (data instanceof byte[]) {
+                    wsEventReporter.frameSent((byte[]) data);
+                } else {
+                    wsEventReporter.frameSent(data.toString());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 reportError(e.getMessage());
