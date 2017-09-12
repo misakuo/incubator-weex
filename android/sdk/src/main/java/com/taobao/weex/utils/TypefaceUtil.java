@@ -41,7 +41,7 @@ import java.util.Map;
  * Created by sospartan on 7/13/16.
  */
 public class TypefaceUtil {
-  public static final String FONT_CACHE_DIR_NAME = "font-family";
+  public static final String FONT_CACHE_DIR_NAME = "weex-font-family";
   private final static String TAG = "TypefaceUtil";
   private final static Map<String, FontDO> sCacheMap = new HashMap<>(); //Key: fontFamilyName
 
@@ -124,7 +124,7 @@ public class TypefaceUtil {
       } else if (fontDo.getType() == FontDO.TYPE_NETWORK) {
         final String url = fontDo.getUrl();
         final String fontFamily = fontDo.getFontFamilyName();
-        final String fileName = url.replace('/', '_').replace(':', '_');
+        final String fileName = getFontCacheFileName(url);
         File dir = new File(getFontCacheDir());
         if(!dir.exists()){
           dir.mkdirs();
@@ -218,6 +218,7 @@ public class TypefaceUtil {
       if (!file.exists()) {
         return false;
       }
+      WXLogUtils.d(TAG, "Load typeface from path: " + path);
       Typeface typeface = Typeface.createFromFile(path);
       if (typeface != null) {
         FontDO fontDo = sCacheMap.get(fontFamily);
@@ -228,9 +229,7 @@ public class TypefaceUtil {
             WXLogUtils.d(TAG, "load local font file success");
           }
 
-          Intent intent = new Intent(ACTION_TYPE_FACE_AVAILABLE);
-          intent.putExtra("fontFamily", fontFamily);
-          LocalBroadcastManager.getInstance(WXEnvironment.getApplication()).sendBroadcast(intent);
+          notifyTypefaceAvailable(fontFamily);
           return true;
         }
       } else {
@@ -242,7 +241,17 @@ public class TypefaceUtil {
     return false;
   }
 
-  private static String getFontCacheDir() {
-    return WXEnvironment.getDiskCacheDir(WXEnvironment.getApplication()) + "/" + FONT_CACHE_DIR_NAME;
+  public static String getFontCacheDir() {
+    return WXEnvironment.getDiskCacheDir(WXEnvironment.getApplication()) + File.separator + FONT_CACHE_DIR_NAME;
+  }
+
+  public static String getFontCacheFileName(String url) {
+    return url == null ? null : url.replace('/', '_').replace(':', '_');
+  }
+
+  public static void notifyTypefaceAvailable(String fontFamily) {
+    Intent intent = new Intent(ACTION_TYPE_FACE_AVAILABLE);
+    intent.putExtra("fontFamily", fontFamily);
+    LocalBroadcastManager.getInstance(WXEnvironment.getApplication()).sendBroadcast(intent);
   }
 }
