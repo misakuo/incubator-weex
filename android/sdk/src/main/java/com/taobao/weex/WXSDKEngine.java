@@ -436,6 +436,7 @@ public class WXSDKEngine {
    * Model switch, only applicable for developer model
    * @param debug
    */
+  @Deprecated
   public static void restartBridge(boolean debug) {
     WXEnvironment.sDebugMode = debug;
     WXSDKManager.getInstance().restartBridge();
@@ -489,10 +490,14 @@ public class WXSDKEngine {
     WXSDKManager.getInstance().setActivityNavBarSetter(activityNavBarSetter);
   }
 
+  //Using weex devtools to debug
+  @Deprecated
   public static void show3DLayer(boolean show){
     WXEnvironment.sShow3DLayer=show;
   }
 
+  //Using weex devtools to debug
+  @Deprecated
   public static void switchDebugModel(boolean debug, String debugUrl) {
     if (!WXEnvironment.isApkDebugable()) {
       return;
@@ -533,11 +538,20 @@ public class WXSDKEngine {
       }
     }, 0);
   }
+
+  @Deprecated
   public static void reload(final Context context, boolean remoteDebug) {
    reload(context,null,remoteDebug);
   }
 
   public static void reload() {
-    reload(WXEnvironment.getApplication(), WXEnvironment.sRemoteDebugMode);
+    reload(WXEnvironment.getApplication(), null, WXEnvironment.sRemoteDebugMode);
+  }
+
+  public static void connectToInspector(String debugProxyUrl, boolean enableJSDebug) {
+    WXEnvironment.sRemoteDebugProxyUrl = debugProxyUrl;
+    WXEnvironment.sDebugServerConnectable = true;
+    WXEnvironment.sRemoteDebugMode = enableJSDebug;
+    reload();
   }
 }

@@ -60,16 +60,28 @@ public class WXEnvironment {
   public static final String SETTING_EXCLUDE_X86SUPPORT = "env_exclude_x86";
 
   public static boolean SETTING_FORCE_VERTICAL_SCREEN = false;
-  /**
-   * Debug model
-   */
-  public static boolean sDebugMode = false;
-  public static String sDebugWsUrl = "";
-  public static boolean sDebugServerConnectable = false;
-  public static boolean sRemoteDebugMode = false;
-  public static String sRemoteDebugProxyUrl = "";
-  public static long sJSLibInitTime = 0;
 
+  // Configurations for debug
+  //Using WXSDKEngine.connectToInspector() instead
+  @Deprecated
+  public static boolean sDebugServerConnectable = false;
+
+  //Using WXSDKEngine.connectToInspector() instead
+  @Deprecated
+  public static boolean sRemoteDebugMode = false;
+
+  //Using WXSDKEngine.connectToInspector() instead
+  @Deprecated
+  public static String sRemoteDebugProxyUrl = "";
+
+  @Deprecated
+  public static boolean sDebugMode = false;
+  @Deprecated
+  public static String sDebugWsUrl = "";
+  // End of debug configs
+
+
+  public static long sJSLibInitTime = 0;
   public static long sSDKInitStart = 0;// init start timestamp
   public static long sSDKInitInvokeTime = 0;//time cost to invoke init method
   public static long sSDKInitExecuteTime = 0;//time cost to execute init job
