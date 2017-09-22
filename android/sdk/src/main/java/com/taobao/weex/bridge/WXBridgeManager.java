@@ -196,33 +196,31 @@ public class WXBridgeManager implements Callback,BactchExecutor {
       WXEnvironment.sDebugServerConnectable = true;
     }
 
+    if (mWxDebugProxy != null) {
+      mWxDebugProxy.stop(false);
+    }
     if (WXEnvironment.sDebugServerConnectable && WXEnvironment.isApkDebugable()) {
       if (WXEnvironment.getApplication() != null) {
-        if (mWxDebugProxy == null) {
-          try {
-            Class clazz = Class.forName("com.taobao.weex.devtools.debug.DebugServerProxy");
-            if (clazz != null) {
-              Constructor constructor = clazz.getConstructor(Context.class, WXBridgeManager.class);
-              if (constructor != null) {
-                mWxDebugProxy = (IWXDebugProxy) constructor.newInstance(
-                    WXEnvironment.getApplication(), WXBridgeManager.this);
+        try {
+          Class clazz = Class.forName("com.taobao.weex.devtools.debug.DebugServerProxy");
+          if (clazz != null) {
+            Constructor constructor = clazz.getConstructor(Context.class, WXBridgeManager.class);
+            if (constructor != null) {
+              mWxDebugProxy = (IWXDebugProxy) constructor.newInstance(
+                      WXEnvironment.getApplication(), WXBridgeManager.this);
+              if (mWxDebugProxy != null) {
+                mWxDebugProxy.start();
               }
             }
-          } catch (Throwable e) {
-            WXLogUtils.w("DebugServerProxy", e);
           }
-        } else {
-          WXLogUtils.d("DebugServerProxy", "Reuse inspect session");
+        } catch (Throwable e) {
+          //Ignore, It will throw Exception on Release environment
         }
+        WXServiceManager.execAllCacheJsService();
       } else {
         WXLogUtils.e("WXBridgeManager", "WXEnvironment.sApplication is null, skip init Inspector");
         WXLogUtils.w("WXBridgeManager", new Throwable("WXEnvironment.sApplication is null when init Inspector"));
       }
-
-      if (mWxDebugProxy != null) {
-        mWxDebugProxy.start();
-      }
-      WXServiceManager.execAllCacheJsService();
     }
     if (remoteDebug && mWxDebugProxy != null) {
       mWXBridge = mWxDebugProxy.getWXBridge();
